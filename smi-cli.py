@@ -31,7 +31,10 @@ if __name__ == '__main__':
 
 	if options.register!=None:
 		print('it is for register action')
-		p=subprocess.Popen(['staf',options.ipaddr,'respool','add','pool','dji','entry',options.register])
+		cmd=['staf',options.ipaddr,'respool','add','pool','dji','entry',options.register]
+		#p=subprocess.Popen(['staf',options.ipaddr,'respool','add','pool','dji','entry',options.register])
+		print("cmd=",cmd)
+		p=subprocess.Popen(cmd)
 		p.wait()
 		print('returncode=',p.returncode)
 		if p.returncode==0:
@@ -42,15 +45,24 @@ if __name__ == '__main__':
 			print("fail to register\n")
 	elif options.unregister!=None:
 		print('it is for unregister action')
-		p=subprocess.Popen(['staf',options.ipaddr,'respool','remove','pool','dji','entry',options.unregister, 'confirm'])
+		postcmd='CONFIRM'
+		cmd=['staf',options.ipaddr,'respool','remove','pool','dji','entry',options.unregister, 'confirm']
+		if options.force==True:
+			cmd.append('FORCE')
+		print("cmd=",cmd)
+		p=subprocess.Popen(cmd)
 		p.wait()
 		print('returncode=',p.returncode)
 		if p.returncode==0:
 			print("pass to unreigster\n")
 		elif p.returncode==48:
 			print("it does NOT exist\n")
+		elif p.returncode==4010:
+			print(" A resource pool entry you specified to REMOVE is owned.Use the -f or --force option if you are sure that the correct\
+			      entry is specficed")
 		else:
 			print("fail to unregister\n")
 	else:
 		print('it is unsupported command')
+
 
