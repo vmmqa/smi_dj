@@ -1,26 +1,17 @@
 from optparse import OptionParser  
 if __name__ == '__main__':
-    parser = OptionParser()  
-    parser.add_option("-f", "--file", dest="filename",  
-                  help="test report", metavar="FILE")
-    parser.add_option("-i","--ip",type="string",dest="ipaddr",
-                  help="please input the sever's ip",default="local")
-    parser.add_option("-c","--command",type="string",dest="cmd",
-                  help="please input the triggerred command",default="list")
-    parser.add_option("-q", "--quiet",  
-                  action="store_false", dest="verbose", default=True,  
-                  help="don't print status messages to stdout")  
-  
-    (options, args) = parser.parse_args()
-    print(options.ipaddr)
-    print(options.cmd)
-    #currently it only supports commands: list/launch
-
-    if options.cmd=='list':
-        print('it is for list action')
-    elif options.cmd=='launch':
-        print('it is for launch action')
-    else:
-        print('it is unsupported command')
-
-    #todo: 1. -l,--list; 2. -c (lanuch entry;entry;entry)
+    usage = "myprog[ -f <filename>][-s <xyz>] arg1[,arg2..]"
+    optParser = OptionParser(usage)
+    optParser.add_option("-f","--file",action = "store",type="string",dest = "fileName")
+    optParser.add_option("-r","--run",action = "append",dest = "run")
+    optParser.add_option("-v","--vison", action="store_false", dest="verbose",default='None',
+                     help="make lots of noise [default]")   
+    #fakeArgs = ['-f','file.txt','-v','good luck to you', 'arg2', 'arge','-f','file2.txt']
+    fakeArgs = ['-r','ip:192;broadinfo:xiaoming;user:xiaoming','-r','ip:193']  
+    options, args = optParser.parse_args(fakeArgs)
+    print (options.fileName)
+    print (options.verbose)
+    print ("options=",options)
+    print ("args=",args)
+    print (optParser.print_help())
+    print(type(options.run),options.run)
