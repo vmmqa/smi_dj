@@ -34,3 +34,19 @@ Server started
   staf local respool create pool dji description "example project" 
 
 Now this framework has been setup. :) bear in mind, this server could be ONLY used by administraction which could do control all the registered resources.
+
+Tips:
+================
+Q: how to save the registered resource to user-defined dir
+A:  The syntax is:
+SERVICE <Name> LIBRARY STAFPool [PARMS <Parameters>]
+
+<Name> is the name by which the Resource Pool service will be known on this machine.
+<Parameters> are valid Resource Pool parameters described below.
+Example
+
+service respool library STAFPool
+service respool library STAFPool parms "Directory {STAF/Config/BootDrive}/STAF/user-defined-dir"
+
+The first example will put the resource info to /usr/local/staf/data/STAF/service/respool dir(Linux version)
+The second example will put it to /usr/local/staf/data/STAF/service/user-defined-dir (Linux version)
