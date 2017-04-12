@@ -1,4 +1,5 @@
 # Written by Libo
+import smiCommon
 import os
 import sys
 import multiprocessing
@@ -37,11 +38,18 @@ if __name__ == '__main__':
     #options, args = optParser.parse_args(fakeArgs)
     options, args = optParser.parse_args()
     print(type(options.run),options.run)
-    sys.exit()
     record1 = []   # store input processes
     record2 = []   # store output processes
     lock  = multiprocessing.Lock()    # To prevent messy print
     queue = multiprocessing.Queue(3)
+
+
+    ipl = [] #store all the board ip
+    for item in options.run:
+        ipl.append(smiCommon.cmdparse(item))
+    print(ipl)
+    sys.exit()
+    
     dic = {'192.168.79.1':'service list', 'local':'var list','192.168.79.2':'help help'}
 
     # input processes
