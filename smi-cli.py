@@ -5,7 +5,10 @@ import socket
 import subprocess
 #from subprocess import Popen, PIPE
 #rc = subprocess.call(["ls","-l"])
-if __name__ == '__main__':
+#if __name__ == '__main__':
+def main():
+    ret=0#return code
+    msg=str()#log info
     usage = "usage: %prog [-r|-u boardid] [-f] [-i server's ip]"
     parser = OptionParser(usage=usage)
     parser.add_option("-r", "--register", type="string", dest="register",  
@@ -36,8 +39,8 @@ if __name__ == '__main__':
         entry+=userpc
         print("entry=",entry)
     else:
-        print("Error")
-        sys.exit(-1)
+        parser.print_help()
+        return "fail to fetch system info"
     if options.register!=None:
         print('it is for register action')
         entry+=";DeviceID:"
@@ -47,13 +50,14 @@ if __name__ == '__main__':
         print("cmd=",cmd)
         p=subprocess.Popen(cmd)
         p.wait()
+        ret=p.returncode
         print('returncode=',p.returncode)
         if p.returncode==0:
-            print("pass to reigster\n")
+            msg="pass to reigster"
         elif p.returncode==49:
-            print("already exists\n")
+            msg="already exists"
         else:
-            print("fail to register\n")
+            msg="fail to register"
     elif options.unregister!=None:
         print('it is for unregister action')
         postcmd='CONFIRM'
@@ -65,19 +69,24 @@ if __name__ == '__main__':
         print("cmd=",cmd)
         p=subprocess.Popen(cmd)
         p.wait()
+        ret=p.returncode
         print('returncode=',p.returncode)
         if p.returncode==0:
-            print("pass to unreigster\n")
+            msg="pass to unreigster"
         elif p.returncode==48:
-            print("it does NOT exist\n")
+            msg="it does NOT exist"
         elif p.returncode==4010:
-            print(" A resource pool entry you specified to REMOVE is owned.Use the -f or --force option if you are sure that the correct\
-                entry is specficed")
+            msg=" A resource pool entry you specified to REMOVE is owned.Use the -f or --force option if you are sure that the correct\
+                entry is specficed"
         else:
-            print("fail to unregister\n")
+            msg="fail to unregister"
     else:
-        print('it is unsupported command')
+        msg="it is unsupported command"
+
+    print(msg)
+    return p.returncode
 
 
-
-
+if __name__ == '__main__':
+    msg=main()
+    print(msg)
