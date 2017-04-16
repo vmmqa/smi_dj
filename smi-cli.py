@@ -82,9 +82,10 @@ def main():
             msg="fail to unregister"
     else:
         msg="it is unsupported command"
+        ret=-1
 
     print(msg)
-    return p.returncode
+    return ret
 
 
 if __name__ == '__main__':
