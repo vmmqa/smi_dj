@@ -16,7 +16,7 @@ Client started
 2. add below statement into <STAFDIR>/bin/STAF.cfg file
   trust level 5 default
 3. lanuch staf by invoking startSTAFProcess.sh(Linux)
-4. run smi_cli.py to register/unregister resource to sever. the usage of this script could be got by:
+4. run smi-cli.py to register/unregister resource to sever. the usage of this script could be got by:
   python smi-cli.py -h
 
 bear in mind, the verified version of python is  on 3.4 and 2.7.
@@ -50,3 +50,14 @@ service respool library STAFPool parms "Directory {STAF/Config/BootDrive}/STAF/u
 
 The first example will put the resource info to /usr/local/staf/data/STAF/service/respool dir(Linux version)
 The second example will put it to /usr/local/staf/data/STAF/service/user-defined-dir (Linux version)
+
+Q: how to auto-start the staf during the system boot process.  (Linux version)
+A: In general, we recommend that you create a file called /etc/rc.staf with contents:
+    #!/bin/bash
+    /usr/local/staf/startSTAFProc.sh &
+
+Make the file executable (755 is most likely sufficient)
+    chmod 777 /etc/rc.staf
+
+Next add the following line to /etc/inittab
+    staf:5:boot:/etc/rc.staf
