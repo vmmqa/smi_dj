@@ -2,6 +2,7 @@ from optparse import OptionParser
 import sys
 import os
 import socket
+import getpass
 import subprocess
 #from subprocess import Popen, PIPE
 #rc = subprocess.call(["ls","-l"])
@@ -25,18 +26,22 @@ def main():
     print(options.ipaddr)
     print(options.unregister)
     print(options.force)
-    ip=socket.gethostbyname(socket.gethostname())
-    username=socket.gethostname()
-    userpc=os.getlogin()
+    ipList=socket.gethostbyname_ex(socket.gethostname())
+    username=getpass.getuser()
+    userpc=socket.gethostname()
     entry=str()
+    ip=str()
     ipMask="10.9" #which indicates it is the specified subnet
-    print("ip=",ip,",username=",username,",userpc=",userpc)
+    for i in ipList[2]:
+        if i.find(ipMask) !=-1:
+            ip=i
+    print("ClientIP=",ip,",UserName=",username,",UserPC=",userpc)
     if(len(ip) and len(username) and len(userpc) and ip.find(ipMask)==0):
         entry+="ClientIP:"
         entry+=ip
-        entry+=";UserName:"
+        entry+=",UserName:"
         entry+=username
-        entry+=";UserPC:"
+        entry+=",UserPC:"
         entry+=userpc
         print("entry=",entry)
     else:
@@ -45,11 +50,11 @@ def main():
         return -1
     if options.register!=None:
         print('it is for register action')
-        entry+=";DeviceID:"
+        entry+=",DeviceID:"
         entry+=options.register
         cmd=['staf',options.ipaddr,'respool','add','pool','dji','entry',entry]
 		#p=subprocess.Popen(['staf',options.ipaddr,'respool','add','pool','dji','entry',options.register])
-        print("cmd=",cmd)
+        print("cmd=%s",cmd)
         p=subprocess.Popen(cmd)
         p.wait()
         ret=p.returncode
@@ -59,6 +64,7 @@ def main():
             localcmd2='staf '+options.ipaddr
             localcmd2+=' process start shell wait command python smi-sql.py -a '
             localcmd2+=entry
+            localcmd2+=" workdir /home/dji/xmzhang/0419/MysqlWrapper"
             print('localcmd2=',localcmd2)
             ret=subprocess.call(localcmd2, shell=True)
             if ret:
@@ -74,7 +80,7 @@ def main():
     elif options.unregister!=None:
         print('it is for unregister action')
         postcmd='CONFIRM'
-        entry+=";DeviceID:"
+        entry+=",DeviceID:"
         entry+=options.unregister
         cmd=['staf',options.ipaddr,'respool','remove','pool','dji','entry',entry, 'confirm']
         if options.force==True:
@@ -86,6 +92,18 @@ def main():
         print('returncode=',p.returncode)
         if p.returncode==0:
             msg="pass to unreigster"
+            localcmd2='staf '+options.ipaddr
+            localcmd2+=' process start shell wait command python smi-sql.py -d '
+            localcmd2+=entry
+            localcmd2+=" workdir /home/dji/xmzhang/0419/MysqlWrapper"
+            print('localcmd2=',localcmd2)
+            ret=subprocess.call(localcmd2, shell=True)
+            if ret:
+                output='fail to execute '+ localcmd2+' ret='+str(ret)
+                print(output)
+                return -2
+            else:
+                print('pass to execute broad sql delete')
         elif p.returncode==48:
             msg="it does NOT exist"
         elif p.returncode==4010:
@@ -102,5 +120,5 @@ def main():
 
 
 if __name__ == '__main__':
-    msg=main()
-    print(msg)
+    ret=main()
+    print("the return value=%d"%ret)
