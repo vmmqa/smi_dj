@@ -22,10 +22,7 @@ def main():
                   action="store_true", dest="force", default=False,  
                   help="force to unregister the HW on the server even if it is running")  
     (options, args) = parser.parse_args()
-    print(options.register)
-    print(options.ipaddr)
-    print(options.unregister)
-    print(options.force)
+    print("register=%s,ipaddr=%s,unregister=%s,force=%d"%(options.register,options.ipaddr,options.unregister,options.force))
     ipList=socket.gethostbyname_ex(socket.gethostname())
     username=getpass.getuser()
     userpc=socket.gethostname()
@@ -35,7 +32,7 @@ def main():
     for i in ipList[2]:
         if i.find(ipMask) !=-1:
             ip=i
-    print("ClientIP=",ip,",UserName=",username,",UserPC=",userpc)
+    print("ClientIP=%s, UserName=%s,UserPC=%s"%(ip,username,userpc))
     if(len(ip) and len(username) and len(userpc) and ip.find(ipMask)==0):
         entry+="ClientIP:"
         entry+=ip
@@ -46,26 +43,26 @@ def main():
         print("entry=",entry)
     else:
         parser.print_help()
-        print("Error, the username, userpc and ip can't be blank and the ip should start from ", ipMask)
+        print("Error, the username, userpc and ip can't be blank and the ip should start from %s"%ipMask)
         return -1
     if options.register!=None:
         print('it is for register action')
         entry+=",DeviceID:"
         entry+=options.register
-        cmd=['staf',options.ipaddr,'respool','add','pool','dji','entry',entry]
+        localcmd1=['staf',options.ipaddr,'respool','add','pool','dji','entry',entry]
 		#p=subprocess.Popen(['staf',options.ipaddr,'respool','add','pool','dji','entry',options.register])
-        print("cmd=%s",cmd)
-        p=subprocess.Popen(cmd)
+        print("localcmd1=%s"%localcmd1)
+        p=subprocess.Popen(localcmd1)
         p.wait()
         ret=p.returncode
-        print('returncode=',p.returncode)
+        print('returncode=%d'%p.returncode)
         if p.returncode==0:
             msg="pass to reigster"
             localcmd2='staf '+options.ipaddr
             localcmd2+=' process start shell wait command python smi-sql.py -a '
             localcmd2+=entry
             localcmd2+=" workdir /home/dji/xmzhang/0419/MysqlWrapper"
-            print('localcmd2=',localcmd2)
+            print('localcmd2=%s'%localcmd2)
             ret=subprocess.call(localcmd2, shell=True)
             if ret:
                 output='fail to execute '+ localcmd2+' ret='+str(ret)
@@ -82,21 +79,21 @@ def main():
         postcmd='CONFIRM'
         entry+=",DeviceID:"
         entry+=options.unregister
-        cmd=['staf',options.ipaddr,'respool','remove','pool','dji','entry',entry, 'confirm']
+        localcmd1=['staf',options.ipaddr,'respool','remove','pool','dji','entry',entry, 'confirm']
         if options.force==True:
             cmd.append('FORCE')
-        print("cmd=",cmd)
-        p=subprocess.Popen(cmd)
+        print("localcmd1=%s"%localcmd1)
+        p=subprocess.Popen(localcmd1)
         p.wait()
         ret=p.returncode
-        print('returncode=',p.returncode)
+        print('returncode=%d'%p.returncode)
         if p.returncode==0:
             msg="pass to unreigster"
             localcmd2='staf '+options.ipaddr
             localcmd2+=' process start shell wait command python smi-sql.py -d '
             localcmd2+=entry
             localcmd2+=" workdir /home/dji/xmzhang/0419/MysqlWrapper"
-            print('localcmd2=',localcmd2)
+            print('localcmd2=%s'%localcmd2)
             ret=subprocess.call(localcmd2, shell=True)
             if ret:
                 output='fail to execute '+ localcmd2+' ret='+str(ret)
