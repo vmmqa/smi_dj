@@ -356,9 +356,12 @@ def main():
         print('it is for adder action')
         #ret=add('students',{"name":options.adder})
         dictEntry=cmdparseMap(options.adder)
+        if db.isunique_by_dict('ATF_Staf_Deploy',dictEntry) == False:
+            print('it is not unique, please do NOT register it again')
+            return -1
         dictEntry["RegisterTime"]=str(datetime.datetime.today())
         ret=db.insert_row('ATF_Staf_Deploy',dictEntry)
-        print('returncode=',ret)
+        print('returncode=%d'%ret)
         if ret==True:
             msg="pass to add"
         else:
