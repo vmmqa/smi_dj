@@ -12,8 +12,8 @@ class DatabaseConfig(object):
     HOST = 'localhost'
     USER = 'root'
     PORT = 3306
-    PASSWORD = ''
-    DATABASE = 'atrs_test'
+    PASSWORD = '123456'
+    DATABASE = 'ATF_DB'
 
     def __init__(self):
         import table

@@ -327,6 +327,18 @@ def test():
     print db.isunique_by_dict('students',{'username':111})
     print db.isunique_by_value('students','username',1)
     print db.isunique_by_value('students','username',111)
+
+def cmdparseMap(entry):
+    lentry=entry.split(',')
+    cmdLen=len(lentry)
+    dictEntry={}
+    while(cmdLen):
+        cmdLen=cmdLen-1
+        key=lentry[cmdLen].split(':')[0]
+        value=lentry[cmdLen].split(':')[1]
+        dictEntry[key]=value
+    return dictEntry
+
 def main():
     ret=0#return code
     msg=str()#log info
@@ -343,23 +355,19 @@ def main():
     if options.adder!=None:
         print('it is for adder action')
         #ret=add('students',{"name":options.adder})
-        ret=db.insert_row('students',{"name":"test3"})
+        dictEntry=cmdparseMap(options.adder)
+        dictEntry["RegisterTime"]=str(datetime.datetime.today())
+        ret=db.insert_row('ATF_Staf_Deploy',dictEntry)
         print('returncode=',ret)
-        if ret==0:
+        if ret==True:
             msg="pass to add"
-        elif ret==49:
-            msg="already exists"
         else:
             msg="fail to add"
     elif options.deler!=None:
         print('it is for deleter action')
-        localcmd='staf '+options.ipaddr+' process start command '
-        localcmd+='python parms smi-cli.py -h '
-        localcmd+=' workdir /home/sky-nuc-libo1/repos/dji/ wait returnstdout STDERRTOSTDOUT RETURNSTDERR'
-        print("localcmd=",localcmd)
-        ret=subprocess.call(localcmd, shell=True)
+        ret=db.clear_rows_by_dict('ATF_Staf_Deploy',cmdparseMap(options.deler))
         print('returncode=',ret)
-        if ret==0:
+        if ret==True:
             msg="pass to deleter"
         else:
             msg="fail to deleter"
