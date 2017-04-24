@@ -342,20 +342,29 @@ def cmdparseMap(entry):
 def main():
     ret=0#return code
     msg=str()#log info
-    usage = "usage: %prog [-a | -d] entry"
+    usage = "usage: %prog [-a | -d | -u value] entry [-i ip]"
     parser = OptionParser(usage=usage)
-    parser.add_option("-a", "--add", type="string", dest="adder",  
+    parser.add_option("-a", "--add", action="store_true", dest="adder",default=False,
                   help="please input the entry to add")
     parser.add_option("-i","--ip",type="string",dest="ipaddr",
                   help="please input the sever's ip",default="local")
-    parser.add_option("-d","--del",type="string",dest="deler",
+    parser.add_option("-d","--del",action="store_true", dest="deler",default=False,
                   help="please input the entry to delete")
+    parser.add_option("-u","--update",type="string",dest="updater", default=None,
+                  help="please the specifeid field and value to be updated into table")
     (options, args) = parser.parse_args()
     db= MysqlWrapper()
-    if options.adder!=None:
+    print("args=%s,adder=%d,deler=%d"%(args,options.adder,options.deler))
+    entry=str()
+    if len(args)==0:
+        print('you have to input the entry ')
+
+    entry=args[0]
+
+    if options.adder==True:
         print('it is for adder action')
         #ret=add('students',{"name":options.adder})
-        dictEntry=cmdparseMap(options.adder)
+        dictEntry=cmdparseMap(entry)
         if db.isunique_by_dict('ATF_Staf_Deploy',dictEntry) == False:
             print('it is not unique, please do NOT register it again')
             return -1
@@ -366,9 +375,9 @@ def main():
             msg="pass to add"
         else:
             msg="fail to add"
-    elif options.deler!=None:
+    elif options.deler==True:
         print('it is for deleter action')
-        ret=db.clear_rows_by_dict('ATF_Staf_Deploy',cmdparseMap(options.deler))
+        ret=db.clear_rows_by_dict('ATF_Staf_Deploy',cmdparseMap(entry))
         print('returncode=',ret)
         if ret==True:
             msg="pass to deleter"
