@@ -354,7 +354,7 @@ def main():
                   help="please the specifeid field and value to be updated into table")
     (options, args) = parser.parse_args()
     db= MysqlWrapper()
-    print("args=%s,adder=%d,deler=%d"%(args,options.adder,options.deler))
+    print("args=%s,adder=%d,deler=%d,updater=%s"%(args,options.adder,options.deler,options.updater))
     entry=str()
     if len(args)==0:
         print('you have to input the entry ')
@@ -383,6 +383,12 @@ def main():
             msg="pass to deleter"
         else:
             msg="fail to deleter"
+    elif options.updater!=None:
+        ret=db.update_value_by_dict('ATF_Staf_Deploy', cmdparseMap(entry),cmdparseMap(options.updater))
+        if ret==True:
+            msg="pass to update"
+        else:
+            msg="fail to update"
     else:
         msg="it is unsupported command"
         ret=-1
