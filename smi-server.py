@@ -19,6 +19,16 @@ def cmdparseMap(entry):
         dictEntry[key]=value
     return dictEntry
 
+def sqlAction(command):
+    localCommand="python MysqlWrapper/smi-sql.py "
+    localCommand+=command
+    ret=subprocess.call(localCommand,shell=True)
+    if ret==0:
+        print("pass to execute %s"%command)
+    else:
+        print("Fail to execute %s"%command)
+    return ret
+
 # input worker
 def inputQ(queue,i):
     info = str(os.getpid()) + '(put):' + str(time.time()) +'(number):'+str(i)
@@ -72,6 +82,13 @@ def inputQ(queue,testplan,workspace,item, command):
     #tr=random.uniform(1,10) 
     #print('tr=',tr)
     #time.sleep(tr)
+
+    preCommand=" "+item
+    preCommand+=" -u status:running"
+    if(sqlAction(preCommand)==0):
+        print("pass to update running status")
+    else:
+        return
     ret=subprocess.call(cmdstep3,shell=True)
     #output="the result of ("
     #output+=item
@@ -81,8 +98,8 @@ def inputQ(queue,testplan,workspace,item, command):
     #output+=str(ret)
     #output+='\n'
         
-    output=item
-    output+=" -u Result:"
+    output=" "+item
+    output+=" -u status:"
     if ret==0:
         output+="pass"
     else:
@@ -92,6 +109,10 @@ def inputQ(queue,testplan,workspace,item, command):
 #    ret=process.exitcode
     print("item=%s,ret=%d\n"%(item,ret))
     queue.put(output)
+    if(sqlAction(output)==0):
+        print("pass to update pass/fail status")
+    else:
+        return
     
 # output worker
 def outputQ(queue,lock):
@@ -99,9 +120,7 @@ def outputQ(queue,lock):
     lock.acquire()
     print (str(os.getpid()) + '(get):' + info)
     #update the sql
-
     lock.release()
-
 #===================
 # Main
 if __name__ == '__main__':
