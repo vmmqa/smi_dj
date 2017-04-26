@@ -8,40 +8,66 @@ import time
 import random
 from optparse import OptionParser  
 #==================
+def cmdparseMap(entry):
+    lentry=entry.split(',')
+    cmdLen=len(lentry)
+    dictEntry={}
+    while(cmdLen):
+        cmdLen=cmdLen-1
+        key=lentry[cmdLen].split(':')[0]
+        value=lentry[cmdLen].split(':')[1]
+        dictEntry[key]=value
+    return dictEntry
 # input worker
 def inputQ(queue,i):
     info = str(os.getpid()) + '(put):' + str(time.time()) +'(number):'+str(i)
     #print(info)
     queue.put(info)
-def inputQ(queue,testplan,workload,ip, command):
+def inputQ(queue,testplan,workspace,item, command):
     #currently two steps:
     #copy the testplan to remote machine specified dir
     #lanuch the common command on each ip
     #info = str(os.getpid()) + '(put):' + str(time.time()) +'(number):'+str(i)
+    entryDict=cmdparseMap(item)
+    ip=entryDict["ClientIP"]
+    deviceID=entryDict["DeviceID"]
+    print("ip=%s,deviceID=%s"%(ip,deviceID))
     ##################################################
-    #copy the testplan to remote machine specified dir
+    #create and copy the testplan to remote machine specified dir
     ###################################################
-    localcmd1='staf local fs copy file '+testplan
-    localcmd1+=' todirectory '+workload+' tomachine '
-    localcmd1+=ip
-    print('localcmd1=',localcmd1)
-    ret=subprocess.call(localcmd1, shell=True)
+    cmdstep1='staf '+ip+' fs create directory '
+    cmdstep1+=workspace+deviceID
+    print('cmdstep1=',cmdstep1)
+    ret=subprocess.call(cmdstep1, shell=True)
     if ret:
-        output='fail to execute '+ localcmd1+' ret='+str(ret)
-	print(output)
+        output='fail to execute '+ cmdstep1+' ret='+str(ret)
+        print(output)
         queue.put(output)
-	return
+        return
     else:
-	print('pass to execute localcmd1')
+	    print('pass to execute cmdstep1')
+
+    cmdstep2='staf local fs copy file '+testplan
+    cmdstep2+=' todirectory '+workspace+deviceID+' tomachine '
+    cmdstep2+=ip
+    print('cmdstep2=',cmdstep2)
+    ret=subprocess.call(cmdstep2, shell=True)
+    if ret:
+        output='fail to execute '+ cmdstep2+' ret='+str(ret)
+        print(output)
+        queue.put(output)
+        return
+    else:
+	    print('pass to execute cmdstep2')
 
     ########################################################
     #lanuch the common command on each ip and put into queue
     #######################################################
-    localcmd2='staf ' +ip+' process start shell command '
-    localcmd2+=command
-    localcmd2+=' wait returnstdout'
-    process=os.popen(localcmd2)
-    print(localcmd2)
+    cmdstep3='staf ' +ip+' process start shell command '
+    cmdstep3+=command
+    cmdstep3+=' wait returnstdout'
+    process=os.popen(cmdstep3)
+    print(cmdstep3)
     tr=random.uniform(1,10) 
     print('tr=',tr)
     time.sleep(tr)
@@ -61,6 +87,7 @@ def outputQ(queue,lock):
     lock.acquire()
     print (str(os.getpid()) + '(get):' + info)
     lock.release()
+
 #===================
 # Main
 if __name__ == '__main__':
@@ -80,10 +107,10 @@ if __name__ == '__main__':
     queue = multiprocessing.Queue(3)
 
 
-    ipl = [] #store all the board ip
-    for item in options.run:
-        ipl.append(smiCommon.cmdparse(item))
-    print(ipl)
+    #ipl = [] #store all the board ip
+    #for item in options.run:
+    #    ipl.append(smiCommon.cmdparse(item))
+   # print(ipl)
     if(len(options.testplan)==0 or len(options.run)==0):
     	sys.exit()
     
@@ -93,14 +120,14 @@ if __name__ == '__main__':
     # input processes
     #for key in dic:
         #process = multiprocessing.Process(target=inputQ,args=(queue,i))
-    for ip in ipl:
-        process = multiprocessing.Process(target=inputQ,args=(queue,options.testplan,options.workspace,ip,cmd))
+    for item in options.run:
+        process = multiprocessing.Process(target=inputQ,args=(queue,options.testplan,options.workspace,item,cmd))
         process.start()
         record1.append(process)
 
     # output processes
     #for key in dic:
-    for ip in ipl:
+    for item in options.run:
         process = multiprocessing.Process(target=outputQ,args=(queue,lock))
         process.start()
         record2.append(process)
