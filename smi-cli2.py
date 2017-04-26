@@ -21,8 +21,10 @@ def main():
     parser.add_option("-f", "--force",  
                   action="store_true", dest="force", default=False,  
                   help="force to unregister the HW on the server even if it is running")  
+    parser.add_option("-w","--workdir",type="string",dest="workdir",
+                  help="please input the workdir of sql script",default="/home/dji/xmzhang/0419/MysqlWrapper")
     (options, args) = parser.parse_args()
-    print("register=%s,ipaddr=%s,unregister=%s,force=%d"%(options.register,options.ipaddr,options.unregister,options.force))
+    print("register=%s,ipaddr=%s,unregister=%s,force=%d,workdir=%s"%(options.register,options.ipaddr,options.unregister,options.force,options.workdir))
     ipList=socket.gethostbyname_ex(socket.gethostname())
     username=getpass.getuser()
     userpc=socket.gethostname()
@@ -49,23 +51,24 @@ def main():
         print('it is for register action')
         entry+=",DeviceID:"
         entry+=options.register
-        localcmd1=['staf',options.ipaddr,'respool','add','pool','dji','entry',entry]
+        cmdstep1=['staf',options.ipaddr,'respool','add','pool','dji','entry',entry]
 		#p=subprocess.Popen(['staf',options.ipaddr,'respool','add','pool','dji','entry',options.register])
-        print("localcmd1=%s"%localcmd1)
-        p=subprocess.Popen(localcmd1)
+        print("cmdstep1=%s"%cmdstep1)
+        p=subprocess.Popen(cmdstep1)
         p.wait()
         ret=p.returncode
         print('returncode=%d'%p.returncode)
         if p.returncode==0:
             msg="pass to reigster"
-            localcmd2='staf '+options.ipaddr
-            localcmd2+=' process start shell wait command python smi-sql.py -a '
-            localcmd2+=entry
-            localcmd2+=" workdir /home/dji/xmzhang/0419/MysqlWrapper"
-            print('localcmd2=%s'%localcmd2)
-            ret=subprocess.call(localcmd2, shell=True)
+            cmdstep2='staf '+options.ipaddr
+            cmdstep2+=' process start shell wait command python smi-sql.py -a '
+            cmdstep2+=entry
+            cmdstep2+=" workdir "
+            cmdstep2+=options.workdir
+            print('cmdstep2=%s'%cmdstep2)
+            ret=subprocess.call(cmdstep2, shell=True)
             if ret:
-                output='fail to execute '+ localcmd2+' ret='+str(ret)
+                output='fail to execute '+ cmdstep2+' ret='+str(ret)
                 print(output)
                 return -2
             else:
@@ -79,24 +82,25 @@ def main():
         postcmd='CONFIRM'
         entry+=",DeviceID:"
         entry+=options.unregister
-        localcmd1=['staf',options.ipaddr,'respool','remove','pool','dji','entry',entry, 'confirm']
+        cmdstep1=['staf',options.ipaddr,'respool','remove','pool','dji','entry',entry, 'confirm']
         if options.force==True:
             cmd.append('FORCE')
-        print("localcmd1=%s"%localcmd1)
-        p=subprocess.Popen(localcmd1)
+        print("cmdstep1=%s"%cmdstep1)
+        p=subprocess.Popen(cmdstep1)
         p.wait()
         ret=p.returncode
         print('returncode=%d'%p.returncode)
         if p.returncode==0:
             msg="pass to unreigster"
-            localcmd2='staf '+options.ipaddr
-            localcmd2+=' process start shell wait command python smi-sql.py -d '
-            localcmd2+=entry
-            localcmd2+=" workdir /home/dji/xmzhang/0419/MysqlWrapper"
-            print('localcmd2=%s'%localcmd2)
-            ret=subprocess.call(localcmd2, shell=True)
+            cmdstep2='staf '+options.ipaddr
+            cmdstep2+=' process start shell wait command python smi-sql.py -d '
+            cmdstep2+=entry
+            cmdstep2+=" workdir "
+            cmdstep2+=options.workdir
+            print('cmdstep2=%s'%cmdstep2)
+            ret=subprocess.call(cmdstep2, shell=True)
             if ret:
-                output='fail to execute '+ localcmd2+' ret='+str(ret)
+                output='fail to execute '+ cmdstep2+' ret='+str(ret)
                 print(output)
                 return -2
             else:
