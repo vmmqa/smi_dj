@@ -18,6 +18,7 @@ def cmdparseMap(entry):
         value=lentry[cmdLen].split(':')[1]
         dictEntry[key]=value
     return dictEntry
+
 # input worker
 def inputQ(queue,i):
     info = str(os.getpid()) + '(put):' + str(time.time()) +'(number):'+str(i)
@@ -66,19 +67,30 @@ def inputQ(queue,testplan,workspace,item, command):
     cmdstep3='staf ' +ip+' process start shell command '
     cmdstep3+=command
     cmdstep3+=' wait returnstdout'
-    process=os.popen(cmdstep3)
+    #process=os.popen(cmdstep3)
     print(cmdstep3)
-    tr=random.uniform(1,10) 
-    print('tr=',tr)
-    time.sleep(tr)
-    output="the result of ("
-    output+=ip
-    output+=") and cmd=("
-    output+=command
-    output+=")"
-    output+='\n'
-    output+=process.read()
-    process.close()
+    #tr=random.uniform(1,10) 
+    #print('tr=',tr)
+    #time.sleep(tr)
+    ret=subprocess.call(cmdstep3,shell=True)
+    #output="the result of ("
+    #output+=item
+    #output+=") and cmd=("
+    #output+=command
+    #output+=")"
+    #output+=str(ret)
+    #output+='\n'
+        
+    output=item
+    output+=" -u Result:"
+    if ret==0:
+        output+="pass"
+    else:
+        output+="fail"
+  #  output+=process.read()
+ #   process.close()
+#    ret=process.exitcode
+    print("item=%s,ret=%d\n"%(item,ret))
     queue.put(output)
     
 # output worker
@@ -86,6 +98,8 @@ def outputQ(queue,lock):
     info = queue.get()
     lock.acquire()
     print (str(os.getpid()) + '(get):' + info)
+    #update the sql
+
     lock.release()
 
 #===================
