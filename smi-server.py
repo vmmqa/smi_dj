@@ -141,47 +141,79 @@ if __name__ == '__main__':
     optParser = OptionParser()
     optParser.add_option("-t","--testplan",action = "store",type="string",dest = "testplan")
     optParser.add_option("-d","--duration",action = "store",type="string",dest = "duration",default="1d",help="timeout for the longest test")
-    optParser.add_option("-w","--workspace",action = "store",type="string",dest = "workspace",default=r'D:\\ATF_Cloud_WorkSpace\\ATF_Client\\config')
+    optParser.add_option("-w","--workspace",action = "store",type="string",dest = "workspace",default=r'D:\\ATF_Cloud_WorkSpace\\ATF_Client\\config\\')
     optParser.add_option("-r","--run",action = "append",dest = "run")
+    optParser.add_option("-f", "--flush", action="store_true", dest="flush",default=False,help="flush the registered entries status before lanuching jobs")
     #fakeArgs = ['-f','file.txt','-v','good luck to you', 'arg2', 'arge','-f','file2.txt']
     #options, args = optParser.parse_args(fakeArgs)
     options, args = optParser.parse_args()
-    print(type(options.run),options.run)
-    print(type(options.duration),options.duration)
     print(type(options.testplan),options.testplan)
+    print(type(options.duration),options.duration)
+    print(type(options.workspace),options.workspace)
+    print(type(options.run),options.run)
+    print(type(options.flush),options.flush)
     record1 = []   # store input processes
     record2 = []   # store output processes
     lock  = multiprocessing.Lock()    # To prevent messy print
-    queue = multiprocessing.Queue(3)
+    queue = multiprocessing.Queue(30) # could lanuch 30 jobs at the same time
 
 
-    if(len(options.testplan)==0 or len(options.run)==0):
+    
+    if(options.flush==True):
+        print("flush all the status of registered entries")
+        flushCmd=" staf local respool query pool dji | grep Entry: | awk '{print $2}' | uniq"
+        process=os.popen(flushCmd)
+        output=process.read()
+        loutput=output.split('\n')
+        print(type(loutput),loutput)
+        for item in loutput[0:-1]:
+            entryDict=cmdparseMap(item)
+            ip=entryDict["ClientIP"]
+            pingCmd='staf '+ip+' ping ping '
+            print('pingCmd=%s'%pingCmd)
+            sqlCommand=" " +item +" -u DeviceStatus:"
+            ret=subprocess.call(pingCmd, shell=True)
+            if ret:
+                sqlCommand+="offline"
+                print("the %s offline"%ip)
+            else:
+                sqlCommand+="online"
+                print("the %s online"%ip)
+            
+            if(sqlAction(sqlCommand)==0):
+                print("pass to update DeviceStatus value")
+            else:
+                print("fail to update DeviceStatus value")
+            
+        print("the output=%s"%output)
+        sys.exit()
+
+    elif(len(options.testplan)==0 or len(options.run)==0):
     	sys.exit()
+    else:            
+        cmd=r'pushed D:\\ATF_Cloud_WorkSpace\\ATF_Client\\ && python ATF_Main.py '
+
+        # input processes
+        for item in options.run:
+            process = multiprocessing.Process(target=inputQ,args=(queue,options.testplan,options.workspace,item,cmd))
+            process.start()
+            record1.append(process)
+
+        # output processes
+        for item in options.run:
+            process = multiprocessing.Process(target=outputQ,args=(queue,lock))
+            process.start()
+            record2.append(process)
     
+        #wait for the input Q to finish, default 1d
+        for p in record1:
+            p.join(86400)
 
-    cmd=r'pushed D:\\ATF_Cloud_WorkSpace\\ATF_Client\\ && python ATF_Main.py '
+        queue.close()  # No more object will come, close the queue
 
-    # input processes
-    for item in options.run:
-        process = multiprocessing.Process(target=inputQ,args=(queue,options.testplan,options.workspace,item,cmd))
-        process.start()
-        record1.append(process)
+        #wait for the output Q to finish
+        for p in record2:
+            p.join(86400)
 
-    # output processes
-    for item in options.run:
-        process = multiprocessing.Process(target=outputQ,args=(queue,lock))
-        process.start()
-        record2.append(process)
-    
-    #wait for the input Q to finish, default 1d
-    for p in record1:
-        p.join(86400)
-
-    queue.close()  # No more object will come, close the queue
-
-    #wait for the output Q to finish
-    for p in record2:
-        p.join(86400)
-
-    print("all process finishs!")
+        print("all process finishs!")
 
