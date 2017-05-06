@@ -15,7 +15,7 @@ def main():
     parser.add_option("-r", "--register", type="string", dest="register",  
                   help="format, board")
     parser.add_option("-i","--ip",type="string",dest="ipaddr",
-                  help="please input the sever's ip",default="local")
+                  help="please input the sever's ip",default="10.97.68.34")
     parser.add_option("-u","--unregister",type="string",dest="unregister",
                   help="please input the entry")
     parser.add_option("-f", "--force",  
