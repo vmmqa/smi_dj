@@ -22,7 +22,7 @@ def main():
                   action="store_true", dest="force", default=False,  
                   help="force to unregister the HW on the server even if it is running")  
     parser.add_option("-w","--workdir",type="string",dest="workdir",
-                  help="please input the workdir of sql script",default="/home/dji/xmzhang/0419/MysqlWrapper")
+                  help="please input the workdir of sql script",default="/home/dji/ATF/staf/MysqlWrapper")
     (options, args) = parser.parse_args()
     print("register=%s,ipaddr=%s,unregister=%s,force=%d,workdir=%s"%(options.register,options.ipaddr,options.unregister,options.force,options.workdir))
     ipList=socket.gethostbyname_ex(socket.gethostname())
