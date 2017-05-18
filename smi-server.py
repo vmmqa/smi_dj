@@ -186,10 +186,10 @@ if __name__ == '__main__':
                 print("fail to update DeviceStatus value")
             
         print("the output=%s"%output)
-        sys.exit()
+        sys.exit(0)
 
     elif(len(options.testplan)==0 or len(options.run)==0):
-    	sys.exit()
+        sys.exit(1)
     else:            
         cmd=r'pushed D:\\ATF_Cloud_WorkSpace\\ATF_Client\\ && python ATF_Main.py '
 
@@ -216,4 +216,5 @@ if __name__ == '__main__':
             p.join(86400)
 
         print("all process finishs!")
+        sys.exit(0)
 

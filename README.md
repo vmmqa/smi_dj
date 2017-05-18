@@ -61,3 +61,16 @@ Make the file executable (755 is most likely sufficient)
 
 Next add the following line to /etc/inittab
     staf:5:boot:/etc/rc.staf
+
+Q: what's the meaning of all kinds of return value?
+A:
+    client side:
+    0  => pass to execute related commands
+    1  => input argument does not meet requirement
+    -1 => fail to execute step 1 about staf related command
+    -2 => fail to execute step 2 about database related command
+
+    server side:
+    0  => pass to execute related commands
+    1  => input argument does not meet requirement
+

@@ -46,7 +46,7 @@ def main():
     else:
         parser.print_help()
         print("Error, the username, userpc and ip can't be blank and the ip should start from %s"%ipMask)
-        return -1
+        return 1
     if options.register!=None:
         print('it is for register action')
         entry+=",DeviceID:"
@@ -77,6 +77,7 @@ def main():
             msg="already exists"
         else:
             msg="fail to register"
+            ret=-1
     elif options.unregister!=None:
         print('it is for unregister action')
         postcmd='CONFIRM'
@@ -112,6 +113,7 @@ def main():
                 entry is specficed"
         else:
             msg="fail to unregister"
+            ret=-1
     else:
         msg="it is unsupported command"
         ret=-1
