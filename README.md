@@ -74,3 +74,14 @@ A:
     0  => pass to execute related commands
     1  => input argument does not meet requirement
 
+Q: how to speed up the `staf xxx ping ping`?
+A:
+    Note that a STAF PING request is different from a simple non-STAF ping request
+    there are some methods could speed up it.
+    1: reduce the connection attempt from 2(default) to 1 by below command:
+        staf local MISC SET CONNECTATTEMPTS 1
+        
+       then ensure the setting is set successfully
+        staf local misc list settings | grep Connection
+        Connection Attempts      : 1
+
