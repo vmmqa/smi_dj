@@ -91,4 +91,8 @@ A:
 
         then restart the staf
 
+    3: reduce the timeout while it does invoke select() func(linux version), whose value is 5s by default
+        we could reduce it to 3s for example by modify hte /usr/local/staf/bin/STAF.cfg
+        interface tcp library STAFTCP option Secure=No  option Port=6500 OPTION ConnectTimeout=3000
 
+        then restart the staf
