@@ -84,4 +84,11 @@ A:
        then ensure the setting is set successfully
         staf local misc list settings | grep Connection
         Connection Attempts      : 1
+    2: reduce the supported interface, it enables ssl and tcp by default. we could remove one if 
+        necessnary by modify the /usr/local/staf/bin/STAF.cfg
+        #interface ssl library STAFTCP option Secure=No option Port=6550
+        interface tcp library STAFTCP option Secure=No  option Port=6500
+
+        then restart the staf
+
 
